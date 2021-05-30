@@ -13,8 +13,9 @@ namespace OpenRegion71Bot.Controllers
 {
     public class HomeController : Controller
     {
+        public static readonly TelegramBotClient bot = new TelegramBotClient(ConfidentialData.BotTelegramToken);
+        
         private readonly ILogger<HomeController> _logger;
-        private static readonly TelegramBotClient bot = new TelegramBotClient("token"); // token = api telegram token
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -46,14 +47,25 @@ namespace OpenRegion71Bot.Controllers
         {
             if (e.Message.Type == Telegram.Bot.Types.Enums.MessageType.Text)
             {
-                if (e.Message.Text == "/start")
+                // обновляем пользователя 
+                await Management.UpdateDataBase.CheckUser(e.Message);
+
+                List<string> command = e.Message.Text.Split("_").ToList();
+                switch (command[0])
                 {
-                    await bot.SendTextMessageAsync(e.Message.Chat.Id, $"Добрый день, {(e.Message.From.FirstName + " " + e.Message.From.LastName).Trim()}!\n" +
-                        $"Доступные вам действия можно узнать в разделе Помощь /help.");
-                }
-                else
-                {
-                    await bot.SendTextMessageAsync(e.Message.Chat.Id, "Неизвестная команда", replyToMessageId: e.Message.MessageId);
+                    case "/start":
+                        await bot.SendTextMessageAsync(e.Message.Chat.Id, $"Добрый день, {e.Message.From.FirstName}!\n" +
+                            $"Доступные вам действия можно узнать /help.");
+                        break;
+                    case "/help":
+                        await Management.HelpPage(e.Message);
+                        break;
+                    case "/id":
+                        await Management.InformationAboutMessage(e.Message);
+                        break;
+                    default:
+                        await bot.SendTextMessageAsync(e.Message.Chat.Id, "Неизвестная команда.", replyToMessageId: e.Message.MessageId);
+                        break;
                 }
             }
             else
