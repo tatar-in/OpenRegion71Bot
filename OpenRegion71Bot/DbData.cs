@@ -217,7 +217,7 @@ namespace OpenRegion71Bot
             public override bool Equals(Object obj)
             {
                 if (obj is User ob) return Id.Equals(ob.Id) && Name.Equals(ob.Name) && Nick.Equals(ob.Nick) 
-                        && IsBot.Equals(ob.IsBot) && Rules.Equals(ob.Rules);
+                        && IsBot.Equals(ob.IsBot);
                 return false;
             }
             public override int GetHashCode()

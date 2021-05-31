@@ -45,6 +45,7 @@ namespace OpenRegion71Bot
             {
                 new DbData.Rule() { Id = 1, Name = "Администратор" },
                 new DbData.Rule() { Id = 2, Name = "Изменение обращений" },
+                new DbData.Rule() { Id = 3, Name = "Просмотр обращений" },
                 new DbData.Rule() { Id = 100, Name = "Без прав" },
             });
             modelBuilder.Entity<DbData.User>().ToTable("Users");
