@@ -26,7 +26,7 @@ namespace OpenRegion71Bot.Controllers
         {
             bot.OnMessage += Bot_OnMessage;
             bot.OnMessageEdited += Bot_OnMessageEdited;
-            
+            bot.OnCallbackQuery += Bot_OnCallbackQuery;
             bot.StartReceiving(); 
 
             return View();
@@ -43,13 +43,14 @@ namespace OpenRegion71Bot.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        private static async void Bot_OnMessage(object sender, MessageEventArgs e) 
+        private async void Bot_OnMessage(object sender, MessageEventArgs e) 
         {
             if (e.Message.Type == Telegram.Bot.Types.Enums.MessageType.Text)
             {
                 // обновляем пользователя 
-                await Management.UpdateDataBase.CheckUser(e.Message);
+                await Management.UpdateDataBase.CheckUser(e.Message.From.Id, e.Message.From.FirstName, e.Message.From.LastName, e.Message.From.Username, e.Message.From.IsBot);
 
+                // делим команду на составные
                 List<string> command = e.Message.Text.Split("_").ToList();
                 switch (command[0])
                 {
@@ -58,10 +59,19 @@ namespace OpenRegion71Bot.Controllers
                             $"Доступные вам действия можно узнать /help.");
                         break;
                     case "/help":
-                        await Management.HelpPage(e.Message);
+                        await Management.HelpPage(e.Message.Chat.Id, e.Message.From.Id);
                         break;
                     case "/id":
-                        await Management.InformationAboutMessage(e.Message);
+                        await Management.InformationAboutMessage(e.Message.Chat.Id, e.Message.From.Id, e.Message.Text);
+                        break;
+                    case "/updatedistricts":
+                        await Management.UpdateDataBase.DistrictsFromApi(e.Message.Chat.Id, e.Message.From.Id);
+                        break;
+                    case "/updateexecutors":
+                        await Management.UpdateDataBase.ParseIspolnitels(e.Message.Chat.Id, e.Message.From.Id);
+                        break;
+                    case "/changeisp":
+                        await Management.ChangingIspolnitel.ChangeIspolnitel(e.Message.Chat.Id, e.Message.From.Id, e.Message.MessageId, e.Message.Text);
                         break;
                     default:
                         await bot.SendTextMessageAsync(e.Message.Chat.Id, "Неизвестная команда.", replyToMessageId: e.Message.MessageId);
@@ -73,9 +83,24 @@ namespace OpenRegion71Bot.Controllers
                 await bot.SendTextMessageAsync(e.Message.Chat.Id, "Данный тип сообщений не поддерживается, разрешены только текстовые сообщения.", replyToMessageId: e.Message.MessageId);
             }
         }
-        private static async void Bot_OnMessageEdited(object sender, MessageEventArgs e)
+        private async void Bot_OnMessageEdited(object sender, MessageEventArgs e)
         {
             await bot.SendTextMessageAsync(e.Message.Chat.Id, "Изменение сообщений не поддерживается.", replyToMessageId: e.Message.MessageId);
         }
+        private async void Bot_OnCallbackQuery(object sender, CallbackQueryEventArgs e)
+        {
+            // делим команду на составные
+            List<string> command = e.CallbackQuery.Data.Split("_").ToList();
+            switch(command[0])
+            {
+                case "/changeisp":
+                    await Management.ChangingIspolnitel.ChangeIspolnitel(e.CallbackQuery.Message.Chat.Id, e.CallbackQuery.From.Id, e.CallbackQuery.Message.MessageId, e.CallbackQuery.Data);
+                    break;
+                default:
+                    await bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Неизвестная команда.");
+                    break;
+            }
+        }
     }
 }
+

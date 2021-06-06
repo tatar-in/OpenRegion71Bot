@@ -8,17 +8,21 @@ namespace OpenRegion71Bot
         public class Problem
         {
             public int Id { get; set; }
+            public string CategoryName { get; set; }
             public int? CategoryId { get; set; }
             public Category Category { get; set; }
+            public string ThemeName { get; set; }
             public int? ThemeId { get; set; }
             public Theme Theme { get; set; }
             public string Adress { get; set; }
+            public string SourceName { get; set; }
             public int? SourceId { get; set; }
             public Source Source { get; set; }
             public DateTime CreateDate { get; set; }
             public DateTime? AnswerDate { get; set; }
             public string ProblemText { get; set; }
             public string ProblemPhotos { get; set; }
+            public string StatusName { get; set; }
             public int StatusId { get; set; }
             public Status Status { get; set; }
             public string AnswerText { get; set; }
@@ -130,12 +134,13 @@ namespace OpenRegion71Bot
         {
             public int Id { get; set; }
             public string Name { get; set; }
+            public string ShortName { get; set; }
             public string Login { get; set; }
             public int StructureId { get; set; }
             public bool Activity { get; set; }
             public override bool Equals(Object obj)
             {
-                if (obj is Executor ob) return Id.Equals(ob.Id) && Name.Equals(ob.Name) && Login.Equals(ob.Login) 
+                if (obj is Executor ob) return Id.Equals(ob.Id) && Name.Equals(ob.Name) && ShortName.Equals(ob.ShortName) && Login.Equals(ob.Login) 
                         && StructureId.Equals(ob.StructureId) && Activity.Equals(ob.Activity);
                 return false;
             }
